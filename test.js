@@ -242,6 +242,38 @@ test('fire on same node but not from the same caller', function (t) {
   })
 })
 
+test('use latest callbacks from particular caller', function (t) {
+  t.plan(1)
+  var results = []
+  function page (contents) {
+    return onload(yo`<div id="choo-root">${contents}</div>`, function () {
+      results.push('page on: ' + contents)
+    }, function () {
+      results.push('page off: ' + contents)
+    })
+  }
+  var root = page('render1')
+  document.body.appendChild(root)
+  runops([
+    function () {
+      root = yo.update(root, page('render2'))
+    },
+    function () {
+      root = yo.update(root, page('render3'))
+    },
+    function () {
+      document.body.removeChild(root)
+    }
+  ], function () {
+    var expected = [
+      'page on: render1',
+      'page off: render3'
+    ]
+    t.deepEqual(results, expected)
+    t.end()
+  })
+})
+
 test.skip('operates with memoized elements', function (t) {
   t.plan(1)
   var results = []
