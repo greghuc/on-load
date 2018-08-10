@@ -282,7 +282,6 @@ test('use latest callbacks from particular caller', function (t) {
   })
 })
 
-
 test('operates with memoized elements', function (t) {
   t.plan(1)
   var results = []
