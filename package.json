@@ -1,11 +1,15 @@
 {
   "name": "on-load",
-  "version": "3.2.0",
+  "version": "4.0.0",
   "description": "On load/unload events for DOM elements using a MutationObserver",
-  "main": "index.js",
+  "main": "server.js",
+  "browser": {
+    "assert": "nanoassert",
+    "./server.js": "./index.js"
+  },
   "scripts": {
     "start": "wzrd test.js:bundle.js",
-    "test": "standard && browserify test.js | testron"
+    "test": "standard && browserify test.js | tape-run"
   },
   "repository": {
     "type": "git",
@@ -29,14 +33,14 @@
   },
   "homepage": "https://github.com/shama/on-load",
   "dependencies": {
-    "global": "^4.3.0"
+    "global": "^4.3.2",
+    "nanoassert": "^1.1.0"
   },
   "devDependencies": {
-    "browserify": "^13.0.0",
-    "electron-prebuilt": "^0.36.9",
-    "standard": "^7.1.2",
+    "browserify": "^16.2.2",
+    "standard": "^11.0.1",
     "tape": "^4.6.0",
-    "testron": "^1.2.0",
+    "tape-run": "^4.0.0",
     "wzrd": "^1.4.0",
     "yo-yo": "^1.2.1"
   }

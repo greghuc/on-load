@@ -8,13 +8,21 @@ test('onload/onunload', function (t) {
   el.textContent = 'test'
   onload(el, function () {
     t.ok(true, 'onload called')
+    document.body.removeChild(el)
   }, function () {
     t.ok(true, 'onunload called')
     document.body.innerHTML = ''
     t.end()
   })
   document.body.appendChild(el)
-  document.body.removeChild(el)
+})
+
+test('assign key attr', function (t) {
+  t.plan(1)
+  var el = document.createElement('div')
+  el.textContent = 'test'
+  onload(el)
+  t.ok(el.hasAttribute(onload.KEY_ATTR), 'has correct key attr')
 })
 
 test('passed el reference', function (t) {
@@ -58,13 +66,13 @@ test('nested', function (t) {
   var e3 = document.createElement('div')
   onload(e3, function () {
     t.ok(true, 'onload called')
+    e2.removeChild(e3)
   }, function () {
     t.ok(true, 'onunload called')
     document.body.innerHTML = ''
     t.end()
   })
   e2.appendChild(e3)
-  e2.removeChild(e3)
 })
 
 test('complex', function (t) {
@@ -274,7 +282,8 @@ test('use latest callbacks from particular caller', function (t) {
   })
 })
 
-test.skip('operates with memoized elements', function (t) {
+
+test('operates with memoized elements', function (t) {
   t.plan(1)
   var results = []
   function sub () {

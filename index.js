@@ -1,6 +1,7 @@
 /* global MutationObserver */
 var document = require('global/document')
 var window = require('global/window')
+var assert = require('assert')
 var watch = Object.create(null)
 var KEY_ID = 'onloadid' + (new Date() % 9e6).toString(36)
 var KEY_ATTR = 'data-' + KEY_ID
@@ -14,26 +15,42 @@ if (window && window.MutationObserver) {
         eachAttr(mutations[i], turnon, turnoff)
         continue
       }
-      eachMutation(mutations[i].removedNodes, turnoff)
-      eachMutation(mutations[i].addedNodes, turnon)
+      eachMutation(mutations[i].removedNodes, function (index, el) {
+        if (!document.documentElement.contains(el)) turnoff(index, el)
+      })
+      eachMutation(mutations[i].addedNodes, function (index, el) {
+        if (document.documentElement.contains(el)) turnon(index, el)
+      })
     }
   })
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true,
-    attributes: true,
-    attributeOldValue: true,
-    attributeFilter: [KEY_ATTR]
-  })
+
+  if (document.readyState === 'complete') startObserving(observer)()
+  else document.addEventListener('DOMContentLoaded', startObserving(observer))
 }
 
 module.exports = function onload (el, on, off, caller) {
+  assert(document.body, 'on-load: will not work prior to DOMContentLoaded')
   on = on || function () {}
   off = off || function () {}
   el.setAttribute(KEY_ATTR, 'o' + INDEX)
   watch['o' + INDEX] = [on, off, 0, caller || onload.caller]
   INDEX += 1
   return el
+}
+
+module.exports.KEY_ATTR = KEY_ATTR
+module.exports.KEY_ID = KEY_ID
+
+function startObserving (obs) {
+  return function () {
+    obs.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeOldValue: true,
+      attributeFilter: [KEY_ATTR]
+    })
+  }
 }
 
 function turnon (index, el) {
@@ -80,7 +97,7 @@ function eachMutation (nodes, fn) {
         }
       })
     }
-    if (nodes[i].childNodes.length > 0) {
+    if (nodes[i] && nodes[i].childNodes.length > 0) {
       eachMutation(nodes[i].childNodes, fn)
     }
   }
